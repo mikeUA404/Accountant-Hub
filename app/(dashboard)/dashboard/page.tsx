@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { getUserBids, getUserDashboardStats } from "@/services/bid.service";
 import { Sidebar } from "@/components/layout/sidebar";
@@ -8,6 +9,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import type { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "My Dashboard",
 };
@@ -15,28 +18,9 @@ export const metadata: Metadata = {
 export default async function DashboardPage() {
   const session = await auth();
 
-  // Middleware already protects this route.
-  // Safe fallback instead of redirect loop.
+  // Redirect unauthenticated users
   if (!session?.user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
-        <div className="text-center space-y-3">
-          <h1 className="text-2xl font-bold">
-            Authentication Error
-          </h1>
-
-          <p className="text-muted-foreground">
-            Please refresh the page or log in again.
-          </p>
-
-          <Link href="/login">
-            <Button variant="brand">
-              Go to Login
-            </Button>
-          </Link>
-        </div>
-      </div>
-    );
+    redirect("/login?callbackUrl=/dashboard");
   }
 
   const userId = session.user.id;
