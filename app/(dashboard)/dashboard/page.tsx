@@ -1,7 +1,3 @@
-// app/(dashboard)/dashboard/page.tsx
-// Accountant dashboard — shows bid stats and history
-
-import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { getUserBids, getUserDashboardStats } from "@/services/bid.service";
 import { Sidebar } from "@/components/layout/sidebar";
@@ -19,9 +15,28 @@ export const metadata: Metadata = {
 export default async function DashboardPage() {
   const session = await auth();
 
-  // Redirect unauthenticated users to login
+  // Middleware already protects this route.
+  // Safe fallback instead of redirect loop.
   if (!session?.user) {
-    redirect("/login?callbackUrl=/dashboard");
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
+        <div className="text-center space-y-3">
+          <h1 className="text-2xl font-bold">
+            Authentication Error
+          </h1>
+
+          <p className="text-muted-foreground">
+            Please refresh the page or log in again.
+          </p>
+
+          <Link href="/login">
+            <Button variant="brand">
+              Go to Login
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   const userId = session.user.id;
@@ -49,16 +64,25 @@ export default async function DashboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold">
-                Welcome back, {session.user.name?.split(" ")[0]} 👋
+                Welcome back,{" "}
+                {session.user.name?.split(" ")[0]} 👋
               </h1>
+
               <p className="text-sm text-muted-foreground">
                 Here&apos;s an overview of your bidding activity
               </p>
             </div>
+
             <Link href="/jobs">
-              <Button variant="brand" size="sm" className="gap-1.5 hidden sm:flex">
+              <Button
+                variant="brand"
+                size="sm"
+                className="gap-1.5 hidden sm:flex"
+              >
                 <Briefcase className="w-3.5 h-3.5" />
+
                 Browse Jobs
+
                 <ArrowRight className="w-3.5 h-3.5" />
               </Button>
             </Link>
@@ -71,6 +95,7 @@ export default async function DashboardPage() {
             <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-4">
               Overview
             </h2>
+
             <StatsCards stats={stats} />
           </section>
 
@@ -80,12 +105,19 @@ export default async function DashboardPage() {
               <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
                 My Submitted Bids ({bids.length})
               </h2>
+
               {bids.length > 0 && (
-                <Link href="/jobs" className="text-xs text-brand hover:underline flex items-center gap-1">
-                  Find more jobs <ArrowRight className="w-3 h-3" />
+                <Link
+                  href="/jobs"
+                  className="text-xs text-brand hover:underline flex items-center gap-1"
+                >
+                  Find more jobs
+
+                  <ArrowRight className="w-3 h-3" />
                 </Link>
               )}
             </div>
+
             <div className="bg-card border border-border rounded-xl overflow-hidden">
               <BidsTable bids={bids} />
             </div>
