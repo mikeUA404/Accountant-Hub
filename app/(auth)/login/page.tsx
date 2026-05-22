@@ -1,9 +1,6 @@
-// app/(auth)/login/page.tsx
-// Login page — authenticates accountants via NextAuth credentials provider
-
 "use client";
-export const dynamic = "force-dynamic";
-import { useState } from "react";
+
+import { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -14,10 +11,11 @@ import { loginSchema, LoginInput } from "@/validations/auth";
 import { Input, Label } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
+
   const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
@@ -64,7 +62,9 @@ export default function LoginPage() {
               Accountant<span className="text-brand">Hub</span>
             </span>
           </Link>
+
           <h1 className="text-2xl font-bold">Welcome back</h1>
+
           <p className="text-muted-foreground text-sm mt-1">
             Sign in to your accountant account
           </p>
@@ -90,6 +90,7 @@ export default function LoginPage() {
             {/* Email */}
             <div className="space-y-1.5">
               <Label htmlFor="email">Email Address</Label>
+
               <Input
                 id="email"
                 type="email"
@@ -98,14 +99,18 @@ export default function LoginPage() {
                 {...register("email")}
                 className={errors.email ? "border-red-500" : ""}
               />
+
               {errors.email && (
-                <p className="text-xs text-red-400">{errors.email.message}</p>
+                <p className="text-xs text-red-400">
+                  {errors.email.message}
+                </p>
               )}
             </div>
 
             {/* Password */}
             <div className="space-y-1.5">
               <Label htmlFor="password">Password</Label>
+
               <div className="relative">
                 <Input
                   id="password"
@@ -113,18 +118,28 @@ export default function LoginPage() {
                   placeholder="Enter your password"
                   autoComplete="current-password"
                   {...register("password")}
-                  className={`pr-10 ${errors.password ? "border-red-500" : ""}`}
+                  className={`pr-10 ${
+                    errors.password ? "border-red-500" : ""
+                  }`}
                 />
+
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
                 </button>
               </div>
+
               {errors.password && (
-                <p className="text-xs text-red-400">{errors.password.message}</p>
+                <p className="text-xs text-red-400">
+                  {errors.password.message}
+                </p>
               )}
             </div>
 
@@ -160,5 +175,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }
