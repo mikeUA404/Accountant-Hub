@@ -61,7 +61,10 @@ export interface JobCardType {
   budgetMax: number;
   deadline: Date | string;
   deliveryTime: string;
-  status: JobStatus;
+
+  // Fixed for Prisma deployment typing
+  status: string;
+
   postedAt: Date | string;
   category: CategoryType;
   _count: { bids: number };
@@ -86,7 +89,10 @@ export interface BidType {
   deliveryTime: string;
   coverLetter: string;
   experience: string;
-  status: BidStatus;
+
+  // Fixed for Prisma deployment typing
+  status: string;
+
   submittedAt: Date | string;
   updatedAt: Date | string;
   userId: string;
@@ -120,5 +126,7 @@ export interface JobsQueryParams {
   budgetMin?: number;
   budgetMax?: number;
   sort?: "newest" | "oldest" | "budget_desc" | "budget_asc";
-  status?: JobStatus;
+
+  // Fixed for Prisma deployment typing
+  status?: string;
 }
