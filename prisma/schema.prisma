@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  bio       String?
+  skills    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bids Bid[]
+
+  @@map("users")
+}
+
+model Category {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  slug        String  @unique
+  description String?
+  color       String?
+
+  jobs Job[]
+
+  @@map("categories")
+}
+
+model Job {
+  id               String   @id @default(cuid())
+  title            String
+  company          String
+  companyLogo      String?
+  description      String
+  shortDescription String
+  skills           String
+  budgetMin        Float
+  budgetMax        Float
+  deadline         DateTime
+  deliveryTime     String
+  status           String   @default("OPEN")
+  attachments      String?
+  postedAt         DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  bids       Bid[]
+
+  @@map("jobs")
+}
+
+model Bid {
+  id            String   @id @default(cuid())
+  proposedPrice Float
+  deliveryTime  String
+  coverLetter   String
+  experience    String
+  status        String   @default("PENDING")
+  submittedAt   DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId  String
+  job    Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, jobId])
+  @@map("bids")
+}
