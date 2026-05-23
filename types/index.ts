@@ -48,8 +48,8 @@ export interface CategoryType {
 // ─────────────────────────────────────────
 // JOB TYPES
 // ─────────────────────────────────────────
-export type JobStatus = string;
-export type BidStatus = string;
+export type JobStatus = "OPEN" | "CLOSED";
+export type BidStatus = "PENDING" | "ACCEPTED" | "REJECTED";
 
 export interface JobCardType {
   id: string;

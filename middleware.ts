@@ -1,40 +1,35 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+// middleware.ts
+// IMPORTANT: imports from auth.config (edge-safe), NOT from auth.ts
+// auth.ts imports Prisma which cannot run in the Edge runtime
 
-const PROTECTED_ROUTES = ["/dashboard"];
+import NextAuth from "next-auth";
+import { authConfig } from "@/lib/auth.config";
+import { NextResponse } from "next/server";
+
+const { auth } = NextAuth(authConfig);
+
+const PROTECTED_ROUTES = ["/dashboard", "/profile"];
 const AUTH_ROUTES = ["/login", "/register"];
 
-export async function middleware(req: NextRequest) {
-  const token = await getToken({
-    req,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
-
-  const isLoggedIn = !!token;
+export default auth((req) => {
+  const isLoggedIn = !!req.auth?.user;
   const path = req.nextUrl.pathname;
 
-  // Redirect authenticated users away from auth pages
+  // Send logged-in users away from auth pages
   if (isLoggedIn && AUTH_ROUTES.some((r) => path.startsWith(r))) {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+    return NextResponse.redirect(new URL("/dashboard", req.nextUrl));
   }
 
-  // Redirect guests away from protected pages
+  // Send guests away from protected pages
   if (!isLoggedIn && PROTECTED_ROUTES.some((r) => path.startsWith(r))) {
-    const loginUrl = new URL("/login", req.url);
-
-    loginUrl.searchParams.set(
-      "callbackUrl",
-      path
-    );
-
+    const loginUrl = new URL("/login", req.nextUrl);
+    loginUrl.searchParams.set("callbackUrl", path);
     return NextResponse.redirect(loginUrl);
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
-  matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
-  ],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };
